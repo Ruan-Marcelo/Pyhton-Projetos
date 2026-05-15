@@ -23,11 +23,11 @@ from openpyxl import load_workbook
 
 
 # abrir planilha (utilizando workbook) mantendo formatação
-wb_resume = load_workbook("Fatura Mensal VDO.xlsx")
+wb_resume = load_workbook("sua planilha")
 ws_resume = wb_resume["Plan1"]
 
 # pegar planilha resumida
-plan_resume = pd.read_excel("Fatura Mensal VDO.xlsx", sheet_name="Plan1", header=None)
+plan_resume = pd.read_excel("sua planilha", sheet_name="Plan1", header=None)
 
 
 empresas_nome = []
@@ -86,7 +86,7 @@ for obj_empresa in empresas_nome:
     try:
         # pegar a aba da planilha da empresa no arquivo individual
         plan_indi = pd.read_excel(
-            "Fatura Mensal VDO - INDIVIDUAL.xlsx",
+            "sua planilha",
             sheet_name=obj_empresa["nome"]
         )
     except:
