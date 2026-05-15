@@ -18,8 +18,8 @@ import unicodedata
 # ARQUIVOS
 # =========================
 
-arquivo_principal = "Unicom.xlsx"
-arquivo_secundario = "Fatura Mensal VDO.xlsx"
+arquivo_principal = "sua planilha"
+arquivo_secundario = "sua planilha"
 
 # =========================
 # LER PLANILHAS
