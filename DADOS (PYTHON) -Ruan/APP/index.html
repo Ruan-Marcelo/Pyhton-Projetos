@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerador de Laudo Técnico</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="./src/public/manifest.json" />
+    <meta name="theme-color" content="#1976d2" />
+    <!-- Ícone para iOS -->
+    <link rel="apple-touch-icon" href="icon-192x192.png" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #f0f0f0;
+      }
+      .form-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 800px;
+        margin: auto;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .form-section {
+        border-bottom: 1px solid #ddd;
+        padding: 15px 0;
+      }
+      .form-section h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      .input-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      input,
+      select,
+      textarea {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      input[type="text"],
+      input[type="number"],
+      input[type="date"],
+      select {
+        flex: 1;
+        min-width: 150px;
+      }
+      textarea {
+        width: 100%;
+        height: 60px;
+      }
+      .btn-group {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .btn-pdf {
+        background-color: #d32f2f;
+        color: white;
+      }
+      .btn-reset {
+        background-color: #757575;
+        color: white;
+      }
+
+      /* Estilo do PDF */
+      #pdf-template {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 10mm;
+        background: white;
+        color: black;
+        position: absolute;
+        left: -9999999px; /*aqui se tirar mostra  o pdf como vai ficar */
+        box-sizing: border-box;
+      }
+      .pdf-border {
+        border: 3px solid black;
+        height: 100%;
+      }
+      .pdf-header {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .pdf-header td {
+        border-bottom: 2px solid black;
+        padding: 5px;
+        vertical-align: middle;
+      }
+      .pdf-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 16pt;
+      }
+
+      .pdf-info-row {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .pdf-info-row td {
+        padding: 4px 8px;
+        font-size: 10pt;
+      }
+
+      .pdf-section-title {
+        border: 2px solid black;
+        text-align: center;
+        font-weight: bold;
+        padding: 3px;
+        font-size: 11pt;
+      }
+      .pdf-data-box {
+        border: 2px solid black;
+        padding: 8px;
+        font-size: 10pt;
+        min-height: 20px;
+      }
+      .pdf-label {
+        font-weight: bold;
+      }
+
+      /* ESTILO DA ASSINATURA */
+      .pdf-signature {
+        margin-left: 40px;
+        text-align: left;
+        margin-top: 40px;
+        font-size: 10pt;
+        position: relative;
+      }
+      .signature-container {
+        position: relative;
+        display: inline-block;
+        width: 250px;
+      }
+      .signature-img {
+        position: absolute;
+        bottom: -45px; /* subir ou descer asssinatura */
+        left: 50%;
+        transform: translateX(-50%) rotate(180deg);
+        max-height: 150px; /*  tamanho da assinatura */
+        z-index: 1;
+      }
+      .pdf-sig-line {
+        width: 250px;
+        border-top: 2px solid black;
+        margin: 0 auto 5px auto;
+        position: relative;
+        z-index: 2;
+      }
+
+      .pdf-photo-container {
+        display: table;
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+      }
+      .pdf-photo-box {
+        display: table-cell;
+        width: 50%;
+        border: 3px solid black;
+        height: 200px;
+        text-align: center;
+        vertical-align: middle;
+        padding: 5px;
+      }
+      .pdf-photo-box img {
+        width: 340px;
+      }
+
+      .center_center {
+        display: grid;
+        align-content: center;
+        justify-items: center;
+      }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      .slideUp {
+        animation-name: slideUp;
+        animation-duration: 1s;
+        visibility: visible;
+      }
+
+      @keyframes slideUp {
+        0% {
+          opacity: 0;
+          transform: translateY(70%);
+        }
+
+        100% {
+          opacity: 1;
+          transform: translateY(0%);
+        }
+      }
+
+      .slideLeft {
+        animation-name: slideLeft;
+        animation-duration: 1s;
+        visibility: visible;
+      }
+
+      @keyframes slideLeft {
+        0% {
+          opacity: 0;
+          transform: translateX(70%);
+        }
+
+        100% {
+          opacity: 1;
+          transform: translateX(0%);
+        }
+      }
+
+      .slideRight {
+        animation-name: slideRight;
+        animation-duration: 1s;
+        visibility: visible;
+      }
+
+      @keyframes slideRight {
+        0% {
+          opacity: 0;
+          transform: translateX(-20%);
+        }
+
+        100% {
+          opacity: 1;
+          transform: translateX(0%);
+        }
+      }
+
+      .blink {
+        animation: blink 0.1s linear;
+        transform-origin: center;
+        transform-box: fill-box;
+      }
+
+      @keyframes blink {
+        0% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.2);
+        }
+
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Estilo da barra de navegação */
+      nav {
+        background-color: #075e54; /* Cor verde escuro do WhatsApp */
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 2px solid #128c7e; /* Linha abaixo da navbar */
+      }
+
+      /* Estilo dos botões */
+      .nav-button {
+        color: white;
+        text-align: center;
+        padding: 10px 25px;
+        font-size: 16px;
+        font-weight: 500;
+        border-radius: 20px; /* Bordas arredondadas como o WhatsApp */
+        margin: 0 12px;
+        background-color: #25d366; /* Cor verde claro do WhatsApp */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        transition: all 0.3s ease;
+        cursor: pointer; /* Cursor indicando que é clicável */
+      }
+
+      .nav-button:hover {
+        background-color: #128c7e; /* Cor verde mais escura ao passar o mouse */
+        transform: translateY(-4px); /* Efeito de elevação */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Aumenta a sombra ao passar o mouse */
+      }
+
+      .nav-button:active {
+        background-color: #128c7e; /* Verde mais escuro ao clicar */
+        transform: scale(0.98); /* Efeito de "pressionamento" */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra menor ao clicar */
+      }
+
+      /* Media Queries para telas pequenas */
+      @media (max-width: 768px) {
+        nav {
+          padding: 10px 0;
+        }
+
+        .nav-button {
+          padding: 10px 20px;
+          font-size: 15px;
+          margin: 0 8px;
+        }
+      }
+
+      @media (max-width: 430px) {
+        nav {
+          padding: 8px 0;
+        }
+
+        .nav-button {
+          padding: 10px 15px;
+          font-size: 14px;
+          margin: 0 6px;
+        }
+      }
+      .column_center_center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .column_start_center {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      .row_center_center {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="PWAInstallBottom"
+      onclick="installPWA()"
+      style="
+        display: flex;
+        width: 50px;
+        padding: 5px 7px 5px 7px;
+        border: 1px solid black;
+      "
+    >
+      Instalarr
+    </div>
+
+    <div id="teste"></div>
+
+    <!-- form content -->
+    <div class="form-container">
+      <h2>Emissão de Laudo Técnico</h2>
+
+      <div class="form-section">
+        <div class="input-group">
+          <input type="number" id="in_num" placeholder="Nº 011" />
+          <input type="text" id="in_cliente" placeholder="Cliente" />
+          <input type="date" id="in_data" />
+          <!-- sempre a data atual -->
+          <script>
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, "0"); // meses começam do 0
+            const dd = String(today.getDate()).padStart(2, "0");
+            document.getElementById("in_data").value = `${yyyy}-${mm}-${dd}`;
+          </script>
+          <input type="text" id="in_cidade" placeholder="Cidade" />
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Descrição do Produto</h3>
+        <div class="input-group">
+          <input type="text" id="in_medida" placeholder="Medida" />
+          <input type="text" id="in_marca" placeholder="Marca" />
+          <input type="number" id="in_dot" placeholder="DOT" />
+          <input type="number" id="in_fogo" placeholder="Nº Fogo" />
+          <input type="number" id="in_ciclo" placeholder="Ciclo de Vida" />
+          <input type="number" id="in_mm" placeholder="8,0" />
+          <select id="in_unidade">
+            <option value="mm">Milímetros</option>
+            <option value="cm">Centímetros</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>Análise</h3>
+        <div class="input-group">
+          <input
+            type="radio"
+            name="status"
+            id="st_procedente"
+            value="Procedente"
+            checked
+          />
+          <label for="st_procedente">Procedente</label>
+          <input
+            type="radio"
+            name="status"
+            id="st_outro1"
+            value="Improcedente"
+          />
+          <label for="st_outro1">Improcedente</label>
+          <input
+            type="radio"
+            name="status"
+            id="st_outro2"
+            value="Análise Técnica"
+          />
+          <label for="st_outro2">Análise Técnica</label>
+        </div>
+        <textarea id="in_desc" placeholder="Descrição da falha..."></textarea>
+        <textarea id="in_causas" placeholder="Causas prováveis..."></textarea>
+      </div>
+
+      <div class="form-section">
+        <h3>Recomendações</h3>
+        <textarea
+          id="in_recomenda"
+          placeholder="Digite as recomendações separadas por linha..."
+        ></textarea>
+      </div>
+
+      <div class="form-section">
+        <h3>Fotos do Pneu</h3>
+        <input type="file" id="f_img1" accept="image/*" />
+        <input type="file" id="f_img2" accept="image/*" />
+      </div>
+
+      <div class="btn-group">
+        <button class="btn-pdf" onclick="gerarLaudo()">Gerar PDF</button>
+        <button class="btn-reset" onclick="window.location.reload()">
+          Limpar
+        </button>
+      </div>
+    </div>
+
+    <!-- pdf content -->
+    <div id="pdf-template">
+      <div class="pdf-border">
+        <table class="pdf-header">
+          <tr>
+            <td class="pdf-logo-left">
+              <img
+                src=""
+                alt=""
+                style="width: 150px"
+              />
+            </td>
+            <td class="pdf-title">LAUDO TÉCNICO</td>
+            <td class="pdf-logo-right">
+              <img
+                src=""
+                alt=""
+                style="width: 150px"
+              />
+            </td>
+            <td
+              style="
+                width: 60px;
+                text-align: center;
+                border-left: 3px solid black;
+              "
+            >
+              <span class="pdf-label">Nº</span> <span id="out_num"></span>
+            </td>
+          </tr>
+        </table>
+
+        <table class="pdf-info-row">
+          <tr>
+            <td style="width: 60%">
+              <span class="pdf-label">Cliente:</span>
+              <span id="out_cliente"></span>
+            </td>
+            <td>
+              <span class="pdf-label">Data:</span> <span id="out_data"></span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <span class="pdf-label">Cidade:</span>
+              <span id="out_cidade"></span>
+            </td>
+          </tr>
+        </table>
+
+        <div class="pdf-section-title">DESCRIÇÃO DO PRODUTO</div>
+        <div class="pdf-data-box">
+          <span class="pdf-label">MEDIDA:</span> <span id="out_medida"></span
+          ><br />
+          <span class="pdf-label">MARCA:</span> <span id="out_marca"></span
+          ><br />
+          <span class="pdf-label">DOT:</span> <span id="out_dot"></span><br />
+          <span class="pdf-label">Nº FOGO:</span> <span id="out_fogo"></span
+          ><br />
+          <span class="pdf-label">CICLO DE VIDA:</span>
+          <span id="out_ciclo"></span><br />
+          <span class="pdf-label">MM REMANESCENTE:</span>
+          <span id="out_mm"></span> <span id="out_unidade"></span>
+        </div>
+
+        <div class="pdf-section-title">ANÁLISE</div>
+        <div class="pdf-data-box">
+          <span class="pdf-label">STATUS:</span> <span id="out_status"></span>
+        </div>
+        <div class="pdf-data-box" style="min-height: 120px">
+          <p>
+            <span class="pdf-label">DESCRIÇÃO:</span>
+            <span id="out_desc"></span>
+          </p>
+          <p>
+            <span class="pdf-label">CAUSAS PROVÁVEIS:</span>
+            <span id="out_causas"></span>
+          </p>
+        </div>
+
+        <div class="pdf-data-box" style="min-height: 100px">
+          <span class="pdf-label">RECOMENDAÇÕES:</span><br />
+          <div
+            id="out_recomenda"
+            style="margin-top: 5px; line-height: 1.5"
+          ></div>
+        </div>
+
+        <div class="pdf-signature">
+          <div class="signature-container">
+            <img
+              class="signature-img"
+              src=""
+              alt=""
+            />
+            <div class="pdf-sig-line"></div>
+          </div>
+          <br />Técnico Responsável (Sidnei Arruda)
+        </div>
+
+        <div class="pdf-photo-container">
+          <div class="pdf-photo-box"><img id="view_img1" src="" /></div>
+          <div class="pdf-photo-box"><img id="view_img2" src="" /></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MICROFONE -->
+    <div
+      onmousedown="touchstart(this, event)"
+      class="column_center pointer"
+      style="
+        position: fixed;
+        right: 6px;
+        bottom: 5px;
+        width: 60px;
+        height: 60px;
+        z-index: 9999;
+      "
+    >
+      <svg
+        id="audio_on"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 443.52 443.52"
+        style="display: none; filter: drop-shadow(1px 3px 1px rgb(0 0 0 / 0.4))"
+      >
+        <circle fill="#5A9BD5" cx="200" cy="200" r="200" />
+      </svg>
+
+      <svg
+        id="audio_off"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 443.52 443.52"
+        style="display: flex; filter: drop-shadow(1px 3px 1px rgb(0 0 0 / 0.4))"
+      >
+        <circle fill="gray" cx="200" cy="200" r="200" />
+      </svg>
+
+      <svg
+        id="no_audio"
+        onclick="no_recognition()"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 488.57 488.57"
+        style="display: none; filter: drop-shadow(1px 3px 1px rgb(0 0 0 / 0.4))"
+      >
+        <circle fill="orange" cx="200" cy="200" r="200" />
+      </svg>
+    </div>
+
+    <!-- canvas -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="seu-script.js"></script>
+
+    <!-- script para o formalrio -->
+    <script>
+     async function gerarLaudo() {
+  document.getElementById("out_num").innerText = document.getElementById("in_num").value || "---";
+  document.getElementById("out_cliente").innerText = document.getElementById("in_cliente").value || "---";
+  document.getElementById("out_cidade").innerText = document.getElementById("in_cidade").value || "---";
+  const d = document.getElementById("in_data").value;
+  document.getElementById("out_data").innerText = d ? d.split("-").reverse().join("/") : "--/--/----";
+
+  document.getElementById("out_medida").innerText = document.getElementById("in_medida").value || "---";
+  document.getElementById("out_marca").innerText = document.getElementById("in_marca").value || "---";
+  document.getElementById("out_dot").innerText = document.getElementById("in_dot").value || "---";
+  document.getElementById("out_fogo").innerText = document.getElementById("in_fogo").value || "---";
+  document.getElementById("out_ciclo").innerText = document.getElementById("in_ciclo").value || "---";
+  document.getElementById("out_mm").innerText = document.getElementById("in_mm").value || "---";
+  document.getElementById("out_unidade").innerText = document.getElementById("in_unidade").value || "---";
+
+  const statusElement = document.querySelector('input[name="status"]:checked');
+  document.getElementById("out_status").innerText = statusElement ? statusElement.value : "Não Informado";
+
+  document.getElementById("out_desc").innerText = document.getElementById("in_desc").value;
+  document.getElementById("out_causas").innerText = document.getElementById("in_causas").value;
+
+  const recText = document.getElementById("in_recomenda").value;
+  const recHtml = recText.split("\n").filter(line => line.trim() !== "").map(line => `* ${line}`).join("<br>");
+  document.getElementById("out_recomenda").innerHTML = recHtml;
+
+  // Carrega imagens
+  await Promise.all([
+    loadImg("f_img1", "view_img1"),
+    loadImg("f_img2", "view_img2"),
+  ]);
+
+  // Pergunta pelo nome do arquivo
+  const sugestaoNome = `laudo_${document.getElementById("in_num").value || "tecnico"}`;
+  let nomeArquivo = prompt("Como deseja salvar o arquivo?", sugestaoNome);
+  if (nomeArquivo === null) return;
+  if (!nomeArquivo.toLowerCase().endsWith(".pdf")) nomeArquivo += ".pdf";
+
+  // Captura o template e gera PDF
+  const template = document.getElementById("pdf-template");
+  html2canvas(template, { scale: 1.5, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => {
+    const imgData = canvas.toDataURL("image/jpeg", 0.7);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(nomeArquivo);
+  });
+}
+
+function loadImg(inputId, viewId) {
+  return new Promise((resolve) => {
+    const input = document.getElementById(inputId);
+    const file = input && input.files ? input.files[0] : null;
+    const img = document.getElementById(viewId);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.src = e.target.result;
+        resolve();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // placeholder transparente se não tiver arquivo
+      img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wIAAgMBAgGkA/0AAAAASUVORK5CYII=";
+      resolve();
+    }
+  });
+}
+    </script>
+
+    <script>
+      let deferredPrompt;
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document
+          .getElementById("PWAInstallBottom")
+          .style.setProperty("display", "flex");
+      });
+
+      const isPWA = window.matchMedia("(display-mode: standalone)").matches;
+      if (isPWA) {
+        console.log("Rodando como PWA instalado");
+        document
+          .getElementById("PWAInstallBottom")
+          .style.setProperty("display", "none");
+      } else {
+        console.log("Rodando no navegador normal");
+      }
+
+      async function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`Usuário escolheu: ${outcome}`);
+        deferredPrompt = null;
+        document.getElementById("PWAInstallBottom").style.display = "none";
+
+        // Aguarda a escolha do usuário
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === "accepted") {
+            console.log("Usuário aceitou a instalação");
+          } else {
+            console.log("Usuário recusou a instalação");
+          }
+
+          // Limpa o prompt
+          deferredPrompt = null;
+        });
+      }
+
+      /*
+        // Detecta quando o PWA foi instalado com sucesso
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalado com sucesso!');
+            deferredPrompt = null;
+            document.getElementById('PWAInstallBottom').style.display = 'none';
+        });
+        */
+
+      // Registra o Service Worker e Verifica atualizações a cada vez que o app abre
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js")
+          .then((registration) => {
+            // Verifica atualizações manualmente
+            registration.update();
+
+            // Detecta quando há uma nova versão esperando
+            registration.addEventListener("updatefound", () => {
+              const newWorker = registration.installing;
+
+              newWorker.addEventListener("statechange", () => {
+                if (
+                  newWorker.state === "installed" &&
+                  navigator.serviceWorker.controller
+                ) {
+                  // Nova versão disponível!
+                  if (confirm("Nova versão disponível! Atualizar agora?")) {
+                    newWorker.postMessage({ type: "SKIP_WAITING" });
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          });
+      }
+    </script>
+    <script>
+      // Variável global para guardar o campo selecionado
+      var elementoselecionado = null;
+
+      // Roda assim que a página carrega, monitorando os cliques nos campos
+      document.addEventListener("DOMContentLoaded", function () {
+        const campos = document.querySelectorAll(
+          'input[type="text"], input[type="number"], textarea',
+        );
+        campos.forEach((campo) => {
+          campo.addEventListener("focus", () => {
+            elementoselecionado = campo; // Guarda o campo que recebeu o clique/foco
+          });
+        });
+      });
+
+      //-- SPEECH TO TEXT ----------------------------------------------------------------
+      // let visit_today = false;
+      let welcome_audio = false;
+      let recognition_timeout = 0;
+      let recognition = null;
+      let recognition_permission = 0;
+
+      // Verifica se o navegador suporta a API de reconhecimento de fala
+      if ("webkitSpeechRecognition" in window) {
+        console.log("webkitSpeechRecognition");
+
+        recognition = new webkitSpeechRecognition();
+
+        // Defina o idioma para o reconhecimento de fala (por exemplo, 'en-US' para inglês dos EUA)
+        recognition.lang = "pt-BR";
+
+        // Defina esta opção como true se você quiser que a fala seja continuamente reconhecida até que o usuário pare de falar
+        recognition.continuous = true;
+        // recognition.continuous = false;
+
+        // Defina esta opção como true se você quiser que a fala seja interpretada enquanto o usuário estiver falando
+        recognition.interimResults = false;
+
+        // Isso significa que a API só retornará uma única transcrição
+        recognition.maxAlternatives = 1;
+
+        // const outputElement = document.getElementById('output');
+        // const startButton = document.getElementById('startButton');
+
+        // Evento disparado quando o usuário começa a falar
+        recognition.onstart = function () {
+          console.log("onstart");
+        };
+
+        // Evento disparado quando o reconhecimento de fala termina
+        recognition.onend = function () {
+          console.log("onend");
+          recognition_permission++;
+          // outputElement.textContent = 'Reconhecimento de fala encerrado.';
+          // teste();
+
+          //se o microfone estiver denied, ao apertar o botão gera eventos recognition.onend infinito
+          //se o contador chegar a 200 é pq isso aconteceu
+          if (recognition_permission > 200) {
+            //se sim desativar recognition
+            alert("Permita o Microfone");
+            recognition = null;
+            document.getElementById("audio_on").style["display"] = "none";
+            document.getElementById("audio_off").style["display"] = "none";
+            document.getElementById("no_audio").style["display"] = "flex";
+          } else {
+            //se tiver passado 20s
+            if (
+              new Date().getTime() - recognition_timeout > 20000 ||
+              document.getElementById("audio_on").style["display"] === "none"
+            ) {
+              // alert('Reconhecimento de fala encerrado');
+              document.getElementById("audio_on").style["display"] = "none";
+              document.getElementById("audio_off").style["display"] = "flex";
+            } else {
+              recognition.start();
+            }
+          }
+        };
+
+        // Evento disparado quando a API de reconhecimento de fala encontra resultados
+        // recognition.onresult = async function (event) {
+        //     console.log("onresult");
+        //     const result = event.results[event.results.length - 1];
+        //     let transcript = result[0].transcript;
+
+        //     // Exibe o resultado atual na página
+        //     // outputElement.textContent = `Você disse: "${transcript}"`;
+        //     // teste();
+        //     // alert(`Você disse: "${transcript}"`);
+
+        //     // talking(transcript);
+
+        //     document.getElementById("teste").innerText = transcript;
+
+        // };
+
+        recognition.onresult = async function (event) {
+          console.log("onresult");
+          const result = event.results[event.results.length - 1];
+          let transcript = result[0].transcript;
+
+          // Se o usuário clicou em algum campo antes de falar
+          if (elementoselecionado) {
+            const textoAnterior = elementoselecionado.value;
+            // Se já tiver texto, adiciona um espaço antes da nova frase
+            elementoselecionado.value = textoAnterior
+              ? textoAnterior + " " + transcript
+              : transcript;
+          } else {
+            alert(
+              "Por favor, selecione ou clique em um campo de texto antes de ditar!",
+            );
+            end_recognition();
+          }
+        };
+
+        // Evento disparado se ocorrer algum erro no reconhecimento de fala
+        recognition.onerror = function (event) {
+          // outputElement.textContent = 'Erro no reconhecimento de fala: ' + event.error;
+          alert("Erro no reconhecimento de fala: " + event.error);
+        };
+      } else {
+        // Se o navegador não suportar a API de reconhecimento de fala
+        // alert('O reconhecimento de fala não é suportado neste navegador.');
+        alert("Reconhecimento de fala não disponivel");
+        document.getElementById("audio_on").style["display"] = "none";
+        document.getElementById("audio_off").style["display"] = "none";
+        document.getElementById("no_audio").style["display"] = "flex";
+        //document.getElementById("audio_on").style['display'] = 'flex'
+      }
+      function start_recognition() {
+        document.getElementById("audio_on").style["display"] = "flex";
+        document.getElementById("audio_off").style["display"] = "none";
+        recognition_timeout = new Date().getTime();
+        recognition.start();
+      }
+      function end_recognition() {
+        document.getElementById("audio_off").style["display"] = "flex";
+        document.getElementById("audio_on").style["display"] = "none";
+        recognition.stop();
+      }
+      function no_recognition() {
+        if (recognition_permission > 200) {
+          return alert("Permita o Microfone");
+        } else {
+          return alert("Atualize o navegador");
+        }
+      }
+
+      //-- ON CLICK DOWN -------------
+      function touchstart(el, ev) {
+        ev = ev || window.event;
+        ev.preventDefault();
+        // evento_start = ev;
+        // ev.preventDefault();//serve pra não arrastar a div de baixo
+        console.log("touchstart");
+
+        // blink(el);
+
+        mic_sound();
+
+        start_recognition();
+
+        // el.ontouchend = touchend;
+        document.onmouseup = touchend;
+      }
+      function touchend() {
+        console.log("ontouchend");
+
+        document.onmouseup = null;
+        document.onmousemove = null;
+
+        end_recognition();
+      }
+
+      //-- TEXT-TO-SPEECH ----------------------------------------------------
+      const synth = window.speechSynthesis;
+      const speech = new SpeechSynthesisUtterance();
+      // let voice = null;
+      // Set Speech Language
+      //let voices = []; //global array of available voices
+
+      // window.speechSynthesis.onvoiceschanged = () => {
+      synth.onvoiceschanged = function () {
+        // let speech = new SpeechSynthesisUtterance();
+        // Get List of Voices
+        speech.lang = "pt-BR";
+        const voices = synth.getVoices();
+        // console.log(voices);
+        if (
+          voices.find((x) => x.lang === "pt-BR" && x.localService === false)
+        ) {
+          //se for voz externa, boa
+          speech.voice = voices.find(
+            (x) => x.lang === "pt-BR" && x.localService === false,
+          );
+        } else {
+          //se não us a local ruim mesmo
+          speech.voice = voices.find((x) => x.lang === "pt-BR");
+        }
+
+        console.log("synth.onvoiceschanged");
+      };
+      function talking(text) {
+        console.log("talking");
+        speech.text = text;
+        // window.speechSynthesis.speak(speech);
+        synth.speak(speech);
+      }
+
+      function mic_sound() {
+        //     try {
+        //       const payloadBase64 = aqui
+        //       audio.play();
+        //     } catch (err) {
+        //       console.log(err);
+        //     }
+        //   }
+        try {
+          // Cria um som de bipe usando o próprio navegador (sem precisar de arquivos externos)
+          const audioCtx = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+
+          oscillator.type = "sine";
+          oscillator.frequency.value = 0; // Tom do bipe
+          gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volume do som
+
+          oscillator.start();
+          oscillator.stop(audioCtx.currentTime + 0.1); // Dura 100 milissegundos
+        } catch (err) {
+          console.log("Audio Context não suportado ou bloqueado: " + err);
+        }
+      }
+    </script>
+  </body>
+</html>
